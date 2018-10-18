@@ -9,61 +9,88 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/lem_in.h"
+#include "../inc/lemin.h"
 
-t_info		*read_map(int fd)
+static void		first_link(t_farm *farm)
 {
-	t_info	*info;
-	t_info	*node;
-	t_info 	*end;
-	char	*line;
+	char **pipe;
 
-	info = NULL;
-	node = NULL;
-	end = NULL;
-	while (get_next_line(fd, &line) > 0)
+	if (!ft_strchr(farm->line, '-') && farm->line[0] != '#')
+		ft_error("Error: invalid link");
+	if (farm->line[0] != '#')
 	{
-		if (!(node = (t_info *)malloc(sizeof(t_info))))
-			return (NULL);
-		node->line = line;
-		node->role = 0;
-		node->next = NULL;
-		if (info == NULL)
-			info = node;
-		else
-		{
-			end = info;
-			while (end->next)
-				end = end->next;
-			end->next = node;
-		}
+		pipe = ft_strsplit(farm->line, '-');
+		add_link(farm, pipe[0], pipe[1]);
+		add_link(farm, pipe[1], pipe[0]);
+		ft_strings_del(pipe);
 	}
-	return (info);
+	ft_putendl(farm->line);
+	free(farm->line);
 }
 
-void		set_roles(t_info **info)
+void			get_num_ants(t_farm *farm)
 {
-	t_info	*node;
-	char	**details;
+	if (get_next_line(0, &farm->line) < 1)
+		ft_error("Error: could not read file");
+	if (!ft_isnumber(farm->line))
+		ft_error("Error: invalid ants or no ants given");
+	if ((farm->nb_ants = ft_atoi(farm->line)) < 1)
+		ft_error("Error: ants value must be >= 1");
+	ft_putendl(farm->line);
+	free(farm->line);
+}
 
-	node = *info;
-	details = NULL;
-	while (node)
+void			parse_rooms(t_farm *farm)
+{
+	int	len;
+	int	status;
+
+	while (get_next_line(0, &farm->line) > 0)
 	{
-		details = ft_strsplit(node->line, ' ');
-		if (ft_get_2D_array_size(details) == 1 && ft_isnumber(details[0]))
-			node->role = "ants";
-		else if (node->line[0] == '#' && node->line[1] == '#')
-			node->role = "command";
-		else if (ft_strchr(node->line, '-'))
-			node->role = "link";
-		else if (node->line[0] == '#' && node->line[1] != '#')
-			node->role = "comment";
-		else if (ft_get_2D_array_size(details) == 3)
-			node->role = "room";
-		else
-			node->role = "invalid";
-		node = node->next;	
+		if (!ft_strchr(farm->line, ' ') && farm->line[0] != '#')
+			break ;
+		if (!ft_strcmp(farm->line, "##start"))
+			status = 1;
+		if (!ft_strcmp(farm->line, "##end"))
+			status = 2;
+		if (farm->line[0] != '#')
+		{
+			len = ft_strchr(farm->line, ' ') - farm->line;
+			add_room(farm, len);
+			if (status == 1)
+				farm->start_name = ft_strndup(farm->line, len);
+			if (status == 2)
+				farm->end_name = ft_strndup(farm->line, len);
+			status = 0;
+		}
+		ft_putendl(farm->line);
+		free(farm->line);
 	}
-	ft_strings_del(details);
+}
+
+void			parse_links(t_farm *farm)
+{
+	char **links;
+
+	if (farm->line)
+		first_link(farm);
+	while (get_next_line(0, &farm->line) > 0)
+	{
+		if (!ft_strchr(farm->line, '-') && farm->line[0] != '#')
+			break ;
+		if (farm->line[0] != '#')
+		{
+			links = ft_strsplit(farm->line, '-');
+			if (ft_strequ(links[0], links[1]))
+			{
+				ft_strings_del(links);
+				ft_error("Error: room cannot link to itself");
+			}
+			add_link(farm, links[0], links[1]);
+			add_link(farm, links[1], links[0]);
+			ft_strings_del(links);
+		}
+		ft_putendl(farm->line);
+		free(farm->line);
+	}
 }
