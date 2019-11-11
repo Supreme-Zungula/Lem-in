@@ -14,9 +14,11 @@
 
 void			ft_error(char *message)
 {
-	ft_putendl(message);
-	exit(EXIT_FAILURE);
+	if (message)
+		ft_putendl(message);
+	exit(0);
 }
+
 static void		no_start_or_end(t_farm *farm)
 {
 	if (!farm->start_name || !farm->end_name)

@@ -24,7 +24,7 @@ static void		first_link(t_farm *farm)
 		add_link(farm, pipe[1], pipe[0]);
 		ft_strings_del(pipe);
 	}
-	ft_putendl(farm->line);
+	add_to_file(farm);
 	free(farm->line);
 }
 
@@ -32,11 +32,14 @@ void			get_num_ants(t_farm *farm)
 {
 	if (get_next_line(0, &farm->line) < 1)
 		ft_error("Error: could not read file");
+	while (farm->line[0]== '#' && !ft_strequ(farm->line, "##start") &&
+			!ft_strequ(farm->line, "##end"))
+		get_next_line(0, &farm->line);
 	if (!ft_isnumber(farm->line))
 		ft_error("Error: invalid ants or no ants given");
 	if ((farm->nb_ants = ft_atoi(farm->line)) < 1)
 		ft_error("Error: ants value must be >= 1");
-	ft_putendl(farm->line);
+	add_to_file(farm);
 	free(farm->line);
 }
 
@@ -63,7 +66,7 @@ void			parse_rooms(t_farm *farm)
 				farm->end_name = ft_strndup(farm->line, len);
 			status = 0;
 		}
-		ft_putendl(farm->line);
+		add_to_file(farm);
 		free(farm->line);
 	}
 }
@@ -90,7 +93,7 @@ void			parse_links(t_farm *farm)
 			add_link(farm, links[1], links[0]);
 			ft_strings_del(links);
 		}
-		ft_putendl(farm->line);
+		add_to_file(farm);
 		free(farm->line);
 	}
 }

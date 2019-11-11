@@ -1,0 +1,10 @@
+32
+##start
+hat 5 0
+cat 1 2
+car 9 2
+##end
+rabbit 5 4
+hat-cat
+cat-car
+car-rabbit

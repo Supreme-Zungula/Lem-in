@@ -13,59 +13,65 @@
 #include <stdlib.h>
 #include "libft.h"
 
-static size_t	ft_getsize(char const *str, const char c)
+static int			word_ctr(char const *str, char c)
 {
-	size_t	count;
+	int i;
+	int word;
 
-	count = 0;
-	while (*str != '\0')
+	i = 0;
+	word = 0;
+	while (str[i] != '\0')
 	{
-		if (*str != c)
+		while ((str[i] == c) && (str[i] != '\0'))
+			i++;
+		if ((str[i] != c) && (str[i] != '\0'))
+			word++;
+		while ((str[i] != c) && (str[i] != '\0'))
+			i++;
+	}
+	return (word);
+}
+
+static char			**mk_wrd_array(char const *s, char ***wrds_hold, char c)
+{
+	int i;
+	int j;
+	int k;
+
+	i = 0;
+	j = 0;
+	k = 0;
+	while (s[i] != '\0')
+	{
+		while (s[i] == c)
+			i++;
+		if ((s[i] != c) && (s[i] != '\0'))
 		{
-			count++;
-			while (*str != c && *str != '\0')
-				str++;
+			k = i;
+			while ((s[i] != c) && (s[i] != '\0'))
+				i++;
+			(*wrds_hold)[j] = ft_strsub(s, k, (i - k));
+			j++;
 		}
-		if (*str != '\0')
-			str++;
 	}
-	return (count);
+	(*wrds_hold)[j] = NULL;
+	return (*wrds_hold);
 }
 
-static size_t	ft_get_word_len(char const *str, const char c)
+char				**ft_strsplit(char const *s, char c)
 {
-	size_t	len;
+	char	**strs_array;
+	int		wrds;
 
-	len = 0;
-	while (*str++ != '\0' && *str != c)
-		len++;
-	return (len);
-}
-
-char			**ft_strsplit(char const *str, char c)
-{
-	char	**str_arr;
-	size_t	row;
-	size_t	col;
-	size_t	start;
-	size_t	wrdlen;
-
-	row = 0;
-	start = 0;
-	if (!(str_arr = (char **)malloc(sizeof(char *) * ft_getsize(str, c) + 1)))
-		return (NULL);
-	while (row < ft_getsize(str, c))
+	if (s)
 	{
-		col = 0;
-		while (str[start] == c && str[start] != '\0')
-			start++;
-		wrdlen = ft_get_word_len(str + start, c);
-		if (!(str_arr[row] = (char *)malloc(sizeof(char) * wrdlen + 1)))
+		wrds = word_ctr(s, c);
+		strs_array = NULL;
+		if (!(strs_array = (char**)malloc((1 + wrds) * sizeof(char*))))
 			return (NULL);
-		while (str[start] != c && str[start] != '\0')
-			str_arr[row][col++] = str[start++];
-		row++;
+		else
+			mk_wrd_array(s, &strs_array, c);
+		return (strs_array);
 	}
-	str_arr[row] = NULL;
-	return (str_arr);
+	return (NULL);
 }

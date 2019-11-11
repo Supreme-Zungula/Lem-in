@@ -23,7 +23,7 @@ void		add_room(t_farm *farm, int len)
 	new_room->name = ft_strndup(farm->line, len);
 	new_room->link = NULL;
 	new_room->next = NULL;
-	new_room->id = 0;
+	new_room->visited = 0;
 	if (!farm->rooms)
 		farm->rooms = new_room;
 	else
